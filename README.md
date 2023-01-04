@@ -17,4 +17,4 @@ cmake --build . --config Release --parallel $(sysctl -n hw.ncpu)
 
 ## 检测效果
 
-[!检测效果](/images/det_image.jpg)
+![检测效果](/images/det_image.jpg)
