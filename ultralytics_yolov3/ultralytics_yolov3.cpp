@@ -188,7 +188,7 @@ void draw_coco_bboxes(const cv::Mat& bgr, const std::vector<BoxInfo>& bboxes)
         cv::putText(image, text, cv::Point(x, y + label_size.height),
                     cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255, 255, 255));
     }
-
+    cv::imwrite("/Users/yang/CLionProjects/test_openvino/images/det_image.jpg", image);
     cv::imshow("image", image);
 }
 
@@ -309,6 +309,7 @@ int main() {
     nms(boxes, 0.2);
     draw_coco_bboxes(image, boxes);
     cv::waitKey(0);
+
 
     return 0;
 }
