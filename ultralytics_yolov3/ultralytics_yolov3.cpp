@@ -218,7 +218,7 @@ cv::Mat resize_padding(cv::Mat &origin_image, float &ratio, int target_h, int ta
 int main() {
 
     std::string model_file("/Users/yang/CLionProjects/test_openvino/ultralytics_yolov3/fp16/yolov3-tiny-sim.xml");
-    std::string image_file("/Users/yang/CLionProjects/test_openvino/images/dog.jpg");
+    std::string image_file("/Users/yang/CLionProjects/test_openvino/images/traffic_road.jpg");
 
     cv::Mat image = cv::imread(image_file);
 //    cv::Mat input_image;
