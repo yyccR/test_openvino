@@ -17,6 +17,9 @@ set_target_properties(OpenVINO PROPERTIES IMPORTED_LOCATION
 add_library(libtbb SHARED IMPORTED)
 set_target_properties(libtbb PROPERTIES IMPORTED_LOCATION
         ${CMAKE_CURRENT_LIST_DIR}/openvino_2022.3.0/lib/intel64/Release/libtbb.dylib)
+#add_library(openvino_auto_plugin SHARED IMPORTED)
+#set_target_properties(openvino_auto_plugin PROPERTIES IMPORTED_LOCATION
+#        ${CMAKE_CURRENT_LIST_DIR}/openvino_2022.3.0/lib/intel64/Release/libopenvino_auto_plugin.so)
 
 
 add_executable(test_openvino ./ultralytics_yolov3/ultralytics_yolov3.cpp)
@@ -24,3 +27,4 @@ target_link_libraries(test_openvino ${OpenCV_LIBS})
 #target_link_libraries(test_openvino openvino::runtime)
 target_link_libraries(test_openvino OpenVINO)
 target_link_libraries(test_openvino libtbb)
+#target_link_libraries(test_openvino openvino_auto_plugin)

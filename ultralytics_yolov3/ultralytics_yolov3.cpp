@@ -215,9 +215,15 @@ cv::Mat resize_padding(cv::Mat &origin_image, float &ratio, int target_h, int ta
     return out_image;
 }
 
+ov::Core ultralytics_yolov3_openvino_core;
+std::shared_ptr<ov::Model> ultralytics_yolov3_openvino_model;
+ov::CompiledModel ultralytics_yolov3_openvino_compiled_model;
+ov::InferRequest ultralytics_yolov3_openvino_infer_request;
+
 int main() {
 
-    std::string model_file("/Users/yang/CLionProjects/test_openvino/ultralytics_yolov3/fp16/yolov3-tiny-sim.xml");
+    std::string model_file("/Users/yang/CLionProjects/test_openvino/ultralytics_yolov3/fp16/ultralytics-yolov3-tiny-sim.xml");
+    std::string model_bin_file("/Users/yang/CLionProjects/test_openvino/ultralytics_yolov3/fp16/yolov3-tiny-sim.bin");
     std::string image_file("/Users/yang/CLionProjects/test_openvino/images/traffic_road.jpg");
 
     cv::Mat image = cv::imread(image_file);
@@ -231,13 +237,26 @@ int main() {
     cv::Mat input_image = resize_padding(image, ratio, 640, 640, 114);
     input_image.convertTo(input_image, CV_32F, 1.0/255.0);
 
-    ov::Core core;
-    std::shared_ptr<ov::Model> model = core.read_model(model_file);
-    ov::CompiledModel compiled_model = core.compile_model(model, "CPU");
-    ov::InferRequest infer_request = compiled_model.create_infer_request();
+//    ov::Core core;
+//    std::shared_ptr<ov::Model> model = core.read_model(model_file, model_bin_file);
+    ultralytics_yolov3_openvino_model = ultralytics_yolov3_openvino_core.read_model(model_file, model_bin_file);
+//    ov::CompiledModel compiled_model = core.compile_model(model, "AUTO");
+    ultralytics_yolov3_openvino_core.set_property(ov::inference_num_threads(4));
+    ultralytics_yolov3_openvino_compiled_model = ultralytics_yolov3_openvino_core.compile_model(ultralytics_yolov3_openvino_model, "CPU");
+//    ov::InferRequest infer_request = compiled_model.create_infer_request();
+    ultralytics_yolov3_openvino_infer_request = ultralytics_yolov3_openvino_compiled_model.create_infer_request();
+
+//    auto devices = core.get_available_devices();
+    auto devices = ultralytics_yolov3_openvino_core.get_available_devices();
+    for(auto& d : devices){
+        std::cout << "support devices: " << d << std::endl;
+    }
+    std::cout << ultralytics_yolov3_openvino_core.get_versions("CPU") << std::endl;
+
 
     // Get input tensor by index
-    ov::Tensor input_tensor = infer_request.get_input_tensor(0);
+//    ov::Tensor input_tensor = infer_request.get_input_tensor(0);
+    ov::Tensor input_tensor = ultralytics_yolov3_openvino_infer_request.get_input_tensor(0);
     std::cout << "input type: " << input_tensor.get_element_type() << std::endl;
     std::cout << "input shape: " << input_tensor.get_shape().to_string() << std::endl;
     // Element types, names and layouts are aligned with framework
@@ -249,9 +268,11 @@ int main() {
         memcpy(data + 640*640 * j, image_channels[j].data,640*640 * sizeof(float));
     }
 
-    infer_request.infer();
+//    infer_request.infer();
+    ultralytics_yolov3_openvino_infer_request.infer();
     // model has only one output
-    ov::Tensor output_tensor = infer_request.get_output_tensor(0);
+//    ov::Tensor output_tensor = infer_request.get_output_tensor(0);
+    ov::Tensor output_tensor = ultralytics_yolov3_openvino_infer_request.get_output_tensor(0);
     std::cout << "output type: " << output_tensor.get_element_type() << std::endl;
     std::cout << "output shape: " << output_tensor.get_shape().at(1) << std::endl;
     float* out_data = output_tensor.data<float>();
@@ -306,6 +327,8 @@ int main() {
 
     }
 
+
+    ultralytics_yolov3_openvino_infer_request.cancel();
     nms(boxes, 0.2);
     draw_coco_bboxes(image, boxes);
     cv::waitKey(0);
